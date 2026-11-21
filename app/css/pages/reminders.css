@@ -1,0 +1,8 @@
+/* Reminders：To do／Done 切换铺满一行；行左边多一个圆圈，做完的划掉 */
+.rm-page .tabs{display:flex;margin-bottom:6px}
+.rm-page .tabs button{flex:1}
+.rm-row{padding-left:6px}
+.rm-row.done .t{color:var(--ink-3);text-decoration:line-through}
+/* 选择删除时左边的完成圈先藏起来，只留右边选的圈，免得两个圈分不清 */
+.selecting .rm-row .check{display:none}
+.selecting .rm-row{padding-left:14px}

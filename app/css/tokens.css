@@ -1,0 +1,49 @@
+/* 颜色、字、间距只写这里。白天一组，夜里一组。 */
+:root{
+  --bg:#efeff1;
+  --card:#ffffff;
+  --card-2:#f6f6f7;          /* 卡片里的浅底：输入框、分段 */
+  --seg-on:#ffffff;          /* 分段里选中的那格 */
+  --ink:#1c1c1e;
+  --ink-2:#6c6c71;
+  --ink-3:#a3a3a8;
+  --line:rgba(0,0,0,.07);
+  --edge:rgba(0,0,0,.06);    /* 卡片描边 */
+  --feature:#1f1f22;         /* 每页那一张黑卡 */
+  --on-feature:#f4f4f6;
+  --red:#d6453d;
+  --shadow:0 1px 2px rgba(0,0,0,.04),0 10px 28px rgba(0,0,0,.06);
+  --veil:rgba(239,239,241,.55);
+  /* Chat 单独一套：灰白、软影子 */
+  --chat-bg:#f5f5f7; --chat-bar:#ffffff; --chat-line:#ececef; --chat-ink:#38343a;
+  --chat-ke:#ffffff; --chat-me:#e8e8ec; --chat-av:#dedee2; --chat-avink:#8a878c; --chat-time:#e9e9ec; --chat-sub:#a8a5a9;
+  --chat-soft:0 1px 2px rgba(0,0,0,.06),0 2px 8px rgba(0,0,0,.04);
+  --chat-drop:drop-shadow(0 1px 1.5px rgba(0,0,0,.08));   /* 气泡连尖角一起的影子 */
+  --chat-tool:#3a363c; --on-chat-tool:#ffffff; --chat-tool-red:#ff8a80; --chat-star:#cdb27a;
+  /* Chat 的尺寸：头像比一行气泡大一圈，一组第一句跟头像中线对齐由这几个算出来，改哪个都还对齐 */
+  --chat-avatar:40px; --chat-fs:15px; --chat-lh:1.4; --chat-pad-y:5px;
+
+  --sans:"Jakarta",-apple-system,"PingFang SC","HarmonyOS Sans SC","Noto Sans CJK SC",sans-serif;
+  --script:"Italianno",cursive;
+  --fs-label:10.5px; --fs-body:15px; --fs-big:22px;
+  --r-card:24px; --r-row:18px; --r-pill:999px;
+  --pad:20px;
+  --tap:44px;
+  --bar-h:64px;
+  color-scheme:light;
+}
+:root[data-theme="dark"]{
+  --bg:#0e0e10; --card:#1e1e22; --card-2:#2b2b31; --seg-on:#4a4a53;
+  --ink:#f5f5f7; --ink-2:#b9b9c0; --ink-3:#8a8a92;
+  --line:rgba(255,255,255,.1); --edge:rgba(255,255,255,.1);
+  --feature:#ececf0; --on-feature:#141416;
+  --red:#ff7a70;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 28px rgba(0,0,0,.45);
+  --veil:rgba(14,14,16,.55);
+  --chat-bg:#000000; --chat-bar:#141416; --chat-line:rgba(84,84,88,.55); --chat-ink:#ffffff;
+  --chat-ke:#242426; --chat-me:#3a3a3d; --chat-av:#3a3a3d; --chat-avink:#d1d1d6; --chat-time:#242426; --chat-sub:#9c9ca3;
+  --chat-soft:none;
+  --chat-drop:none;
+  --chat-tool:#ececf0; --on-chat-tool:#1a1a1c; --chat-tool-red:#d6453d; --chat-star:#d9bf85;
+  color-scheme:dark;
+}

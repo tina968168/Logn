@@ -1,0 +1,7 @@
+*.apk
+*.keystore
+*.jks
+logn-data/
+__pycache__/
+android/out/
+android/assets/

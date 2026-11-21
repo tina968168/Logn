@@ -1,0 +1,126 @@
+/* Chat：单独一套样子（灰白、方圆气泡带小尖角、方头像），别的页不动。颜色和尺寸在 tokens.css 的 --chat-* */
+.app[data-page="chat"]{background:var(--chat-bg)}
+.app[data-page="chat"] .bar{margin-top:0;padding-top:14px;height:calc(var(--bar-h) + 14px);background:var(--chat-bar);border-bottom:1px solid var(--chat-line)}
+.app[data-page="chat"] .bar .round{border-color:transparent}
+.app[data-page="chat"] .bar{position:relative}
+.app[data-page="chat"] .ch-head{position:absolute;left:50%;top:14px;height:var(--bar-h);display:flex;align-items:center;transform:translateX(-50%)}   /* 名字在整条顶栏正中，不管左右按钮几个；标题那格照样占着中间，按钮留在右边 */
+.ch-head{font-weight:500;letter-spacing:.04em}
+
+.ch-page{flex:1;min-height:0;display:flex;flex-direction:column;background:var(--chat-bg);color:var(--chat-ink)}
+.ch-scroll{padding:8px 16px 16px}
+
+/* 一行：头像（一组第一句才有，在上沿，比一行气泡大一圈）、气泡和旁边的时间；我的在右边 */
+.ch-row{display:flex;align-items:flex-start;gap:10px;padding:4px 0}
+.ch-row.first{margin-top:14px}
+.ch-row.me{justify-content:flex-end}
+.ch-row.me .ch-tm{order:-1}
+.ch-row.me .ch-av,.ch-row.me .ch-sp{order:1}
+.ch-row .pick{order:2;margin-left:auto;align-self:center}
+.ch-row.me .pick{margin-left:0}
+.ch-row.flash .ch-msg>*{outline:2px solid var(--ink-3);outline-offset:2px}
+.ch-row.picked .ch-msg{opacity:.7}
+.ch-av{flex:none;display:grid;place-items:center;width:var(--chat-avatar);height:var(--chat-avatar);border-radius:10px;overflow:hidden;background:var(--chat-av);color:var(--chat-avink);font-size:13px;font-weight:600;font-style:normal}
+.ch-av img{display:block;width:100%;height:100%;object-fit:cover}
+.ch-av.sm{width:28px;height:28px;border-radius:7px;font-size:10.5px}
+.ch-av.big{width:80px;height:80px;border-radius:18px;font-size:22px;margin:0 auto 9px}
+.ch-sp{flex:none;width:var(--chat-avatar)}
+.ch-line{display:flex;align-items:flex-end;gap:6px;min-width:0;max-width:calc(100% - 50px)}   /* 气泡和时间一起，时间贴着气泡下沿 */
+.ch-row.first .ch-line{margin-top:calc((var(--chat-avatar) - var(--chat-fs) * var(--chat-lh) - 2 * var(--chat-pad-y)) / 2)}   /* 一组第一句跟头像中线对齐 */
+.ch-msg{position:relative;min-width:0}
+.ch-msg.lift{z-index:31}
+.ch-tm{flex:none;margin:0 0 2px;font-size:10.5px;color:var(--chat-sub);white-space:nowrap}
+.ch-typing{margin:14px 0 0 calc(var(--chat-avatar) + 10px);font-size:12px;color:var(--chat-sub)}   /* 用户点了 Done、克还没回 */
+.ch-time{width:max-content;margin:18px auto 4px;font-size:11.5px;color:var(--chat-sub)}
+
+/* 气泡：每个都带一个圆头小勾，在左右边上、靠下沿，朝头像那边 */
+.ch-b{position:relative;padding:var(--chat-pad-y) 11px;border-radius:8px;background:var(--chat-ke);filter:var(--chat-drop);font-size:var(--chat-fs);line-height:var(--chat-lh);white-space:pre-wrap;word-break:break-word}
+.me .ch-b{background:var(--chat-me);filter:none}
+.ch-b.tail::after{content:"";position:absolute;bottom:6px;left:-7px;width:9px;height:11px;background:inherit;
+  -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 10'%3E%3Cpath d='M8 0C6 2 3 2.4 1 2.2 0 2.1-.3 3.3.6 3.8 3 5.2 6 7 8 10z'/%3E%3C/svg%3E") no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 10'%3E%3Cpath d='M8 0C6 2 3 2.4 1 2.2 0 2.1-.3 3.3.6 3.8 3 5.2 6 7 8 10z'/%3E%3C/svg%3E") no-repeat}
+.me .ch-b.tail::after{left:auto;right:-7px;transform:scaleX(-1)}
+.ch-ed{margin-left:6px;font-size:10px;color:var(--chat-sub)}
+.ch-q{margin:2px 0 5px;padding:1px 0 1px 8px;border-left:2px solid var(--ink-3);font-size:12px;color:var(--chat-sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
+.ch-star{position:absolute;bottom:-6px;right:-5px;width:18px;height:18px;border-radius:50%;background:var(--chat-bar);box-shadow:var(--chat-soft);display:grid;place-items:center;font-size:10px;color:var(--chat-star)}
+
+/* 图：外面一圈白边；一张就整张，多张两个一排，超过四张最后一格写 +N */
+.ch-pics{position:relative;display:grid;gap:3px;padding:4px;border-radius:18px;background:var(--chat-bar);box-shadow:var(--chat-soft)}
+.ch-pics.n1 img{display:block;width:180px;max-height:240px;object-fit:cover;border-radius:14px}
+.ch-pics:not(.n1){grid-template-columns:1fr 1fr}
+.ch-pics:not(.n1) img{display:block;width:96px;height:96px;object-fit:cover;border-radius:10px}
+.ch-pic{position:relative;display:block}
+.ch-more{position:absolute;inset:0;border-radius:10px;background:rgba(0,0,0,.4);color:#fff;font-style:normal;font-size:16px;display:grid;place-items:center;pointer-events:none}
+.ch-video{position:relative;width:180px;height:135px;border-radius:16px;overflow:hidden;background:var(--chat-av);box-shadow:var(--chat-soft);cursor:pointer}
+.ch-video img{display:block;width:100%;height:100%;object-fit:cover}
+.ch-vplay{position:absolute;left:50%;top:50%;width:42px;height:42px;margin:-21px 0 0 -21px;border-radius:50%;background:rgba(0,0,0,.4);color:#fff;display:grid;place-items:center}
+.ch-vplay svg{width:16px;height:16px;margin-left:2px}
+.ch-video i{position:absolute;left:9px;bottom:7px;font-style:normal;font-size:11px;color:#fff;text-shadow:0 0 4px rgba(0,0,0,.5)}
+
+/* 文件、音频：一张小卡，左边小圆图标 */
+.ch-file{position:relative;width:220px;display:flex;align-items:center;gap:11px;padding:10px 13px;border-radius:18px;background:var(--chat-ke);box-shadow:var(--chat-soft);cursor:pointer}
+.me .ch-file{background:var(--chat-me);box-shadow:none}
+.ch-fi{flex:none;width:34px;height:34px;border-radius:50%;background:var(--chat-bar);box-shadow:var(--chat-soft);display:grid;place-items:center;color:var(--ink-2)}
+.ch-fi svg{width:16px;height:16px}
+.ch-fi svg.fill{width:12px;height:12px;margin-left:1px}
+.ch-ft{flex:1;min-width:0}
+.ch-ft .fn{font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ch-ft .fs{margin-top:2px;font-size:10.5px;color:var(--chat-sub)}
+.ch-track{height:2px;margin-top:6px;border-radius:1px;background:var(--chat-line)}
+.ch-track i{display:block;height:100%;width:0;border-radius:1px;background:var(--chat-sub)}
+.ch-card{position:relative;width:220px;padding:11px 14px;border-radius:18px;background:var(--chat-ke);box-shadow:var(--chat-soft);cursor:pointer}
+.ch-card .big{margin-top:5px;font-size:15px;font-weight:500}
+.ch-card .sm{margin-top:2px;font-size:11.5px;color:var(--chat-sub)}
+
+/* 下面：回复／改的小条，+、输入框、发送 */
+.ch-bottom{flex:none;background:var(--chat-bar);border-top:1px solid var(--chat-line);padding-bottom:env(safe-area-inset-bottom)}
+.ch-note{display:flex;align-items:center;gap:8px;padding:6px 6px 0 18px}
+.ch-note-text{flex:1;min-width:0;display:flex;flex-direction:column;font-size:12px;border-left:2px solid var(--ink-3);padding-left:8px}
+.ch-note-text b{font-weight:600;color:var(--chat-sub)}
+.ch-note-text span{color:var(--chat-sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ch-note-x{flex:none;width:44px;height:44px;display:grid;place-items:center;color:var(--chat-sub)}
+.ch-note-x svg{width:16px;height:16px}
+.ch-in{display:flex;align-items:flex-end;gap:10px;padding:10px 14px 14px}
+.ch-in textarea{flex:1;min-width:0;min-height:42px;max-height:120px;padding:10px 16px;border:1px solid var(--chat-line);border-radius:21px;background:var(--chat-bg);resize:none;overflow-y:hidden;scrollbar-width:none;font-size:15px;line-height:1.4;color:var(--chat-ink)}
+.ch-in textarea::-webkit-scrollbar{display:none}
+.ch-in textarea::placeholder{color:var(--chat-sub)}
+.ch-btn{flex:none;width:42px;height:42px;border-radius:50%;background:var(--chat-time);color:var(--chat-sub);display:grid;place-items:center}
+.ch-btn svg{stroke-width:2}
+.ch-send.on{background:var(--chat-ink);color:var(--chat-bar)}
+
+/* 长按的小工具条、+ 的小框：都带一个尖角指着来处 */
+.ch-dim{position:absolute;inset:0;z-index:30;background:rgba(40,40,45,.12)}
+.ch-tools{position:absolute;display:flex;padding:6px 4px;border-radius:14px;background:var(--chat-tool);color:var(--on-chat-tool);box-shadow:0 6px 18px rgba(0,0,0,.18)}
+.ch-tools button{width:52px;min-height:48px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:10.5px;letter-spacing:.02em}
+.ch-tools svg{width:19px;height:19px}
+.ch-tools .red{color:var(--chat-tool-red)}
+.ch-arrow{position:absolute;width:12px;height:12px;background:inherit;border-radius:2px;transform:rotate(45deg)}
+.ch-arrow.down{bottom:-5px}
+.ch-arrow.up{top:-5px}
+.ch-plus{position:absolute;left:14px;bottom:calc(72px + env(safe-area-inset-bottom));border-radius:16px;background:var(--chat-bar);box-shadow:0 6px 18px rgba(0,0,0,.12)}
+.ch-plus button{display:flex;align-items:center;gap:10px;width:100%;min-height:52px;padding:0 20px 0 12px;font-size:14.5px;color:var(--chat-ink)}
+.ch-plus button+button{border-top:1px solid var(--chat-line)}
+.ch-plus .ch-fi{width:30px;height:30px}
+.ch-plus .ch-arrow{left:15px}
+
+/* ··· 里面 */
+.ch-list,.ch-starred{display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.ch-list button,.ch-srow{display:flex;align-items:center;gap:12px;min-height:56px;padding:10px 14px;text-align:left}
+.ch-list button+button,.ch-srow+.ch-srow{border-top:1px solid var(--line)}
+.ch-list .nm{flex:1}
+.ch-list i{font-style:normal;font-size:12.5px;color:var(--ink-3)}
+.ch-list .ch-fi{width:30px;height:30px}
+svg.next{width:15px;height:15px;color:var(--ink-3)}
+.ch-st{flex:1;min-width:0;display:flex;flex-direction:column}
+.ch-st .t{font-size:14.5px;line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.ch-st .s{margin-top:2px;font-size:11px;color:var(--ink-3)}
+.ch-none{padding:40px 0;text-align:center;font-size:13px;color:var(--ink-3)}
+.ch-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px}
+.ch-grid button{position:relative;aspect-ratio:1;border-radius:8px;overflow:hidden;background:var(--card-2)}
+.ch-grid img{display:block;width:100%;height:100%;object-fit:cover}
+.ch-grid i{position:absolute;left:6px;bottom:5px;font-style:normal;font-size:10.5px;color:#fff;text-shadow:0 0 4px rgba(0,0,0,.5)}
+.ch-frow{width:100%;text-align:left}
+.ch-who{display:flex;justify-content:center;gap:54px;padding:12px 0 0;text-align:center;font-size:12.5px;color:var(--ink-2)}
+.ch-lib{display:grid;grid-template-columns:repeat(4,1fr);gap:14px 12px}
+.ch-lib button{position:relative;aspect-ratio:1;border-radius:14px;background:var(--card-2)}
+.ch-lib img{display:block;width:100%;height:100%;border-radius:14px;object-fit:cover}
+.ch-add{border:1.5px dashed var(--ink-3)!important;background:none!important;color:var(--ink-3);display:grid;place-items:center}
+.ch-lav i{position:absolute;left:50%;bottom:-7px;transform:translateX(-50%);padding:1px 6px;border-radius:7px;background:var(--ink);color:var(--bg);font-style:normal;font-size:9.5px;white-space:nowrap}

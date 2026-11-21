@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>Logn</title>
+<link rel="stylesheet" href="css/fonts.css">
+<link rel="stylesheet" href="css/tokens.css">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/shell.css">
+<link rel="stylesheet" href="css/parts.css">
+<link rel="stylesheet" href="css/pages/reminders.css">
+<link rel="stylesheet" href="css/pages/notes.css">
+<link rel="stylesheet" href="css/pages/chat.css">
+</head>
+<body>
+<div class="app" id="app">
+
+  <header class="bar">
+    <button class="round" id="menuBtn" aria-label="Menu">
+      <i data-icon="menu"></i>
+      <i class="badge" id="menuBadge" hidden></i>
+    </button>
+    <div class="title">
+      <b id="pageTitle"></b>
+    </div>
+    <!-- 右边按钮：平时垃圾桶、+；选的时候全选、删（带数字）、× -->
+    <button class="round" id="selectBtn" aria-label="Select to delete" hidden>
+      <i data-icon="trash"></i>
+    </button>
+    <button class="round" id="extraBtn" hidden></button>
+    <button class="round" id="actionBtn" aria-label="Add">
+      <i data-icon="plus"></i>
+    </button>
+    <button class="round" id="selectAllBtn" aria-label="Select all" hidden>
+      <i data-icon="all"></i>
+    </button>
+    <button class="round on" id="deleteBtn" aria-label="Delete selected" hidden>
+      <i data-icon="trash"></i>
+      <i class="badge" id="selectBadge" hidden></i>
+    </button>
+    <button class="round" id="cancelBtn" aria-label="Cancel" hidden>
+      <i data-icon="x"></i>
+    </button>
+  </header>
+
+  <main class="pages">
+    <section class="page" id="page-reminders" data-page="reminders"></section>
+    <section class="page" id="page-chat" data-page="chat"></section>
+    <section class="page" id="page-days" data-page="days"></section>
+    <section class="page" id="page-notes" data-page="notes"></section>
+  </main>
+
+  <div class="veil" id="veil"></div>
+  <nav class="drawer" id="drawer" aria-label="Sections">
+    <div class="drawer-head">
+      <span class="label">Logn</span>
+      <span class="script">Little days, kept.</span>
+    </div>
+    <div class="drawer-list" id="drawerList"></div>
+    <div class="drawer-foot">
+      <span class="label">Appearance</span>
+      <div class="seg" id="themeSeg">
+        <button data-v="light">Light</button><button data-v="dark">Dark</button><button data-v="auto">Auto</button>
+      </div>
+      <span class="label">Backup</span>
+      <div class="row2">
+        <button class="pill" id="exportBtn">Export</button>
+        <button class="pill" id="importBtn">Import</button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="sheet-wrap" id="sheetWrap"><div class="sheet" id="sheet"></div></div>
+  <div class="viewer" id="viewer" hidden></div>
+  <div class="dialog-wrap" id="dialogWrap"><div class="dialog" id="dialog"></div></div>
+  <div class="toast" id="toast"></div>
+</div>
+<input type="file" id="importFile" accept="application/json" hidden>
+<script type="module" src="js/main.js"></script>
+</body>
+</html>

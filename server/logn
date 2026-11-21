@@ -1,0 +1,295 @@
+#!/usr/bin/env python3
+"""Logn 另一头（by=ke）用的命令：在 Chat 里说话，看、加、改、删手机里的四页（两头权利一样，删就真删）。
+跟 logn_server.py 放同一个文件夹，数据目录、暗号用同样的环境变量（LOGN_DIR、LOGN_TOKEN）。
+改动 app 下次同步时拿走（开着 30 秒内）。最前面加 --静：加提醒、日子、笔记时不在 Chat 出卡（一次加很多条时用）。
+
+聊天
+  logn                              最近十五句；对方点了 Done 还没回会写出来
+  logn "话"                         发一句（对方点过的 Done 就算回了）
+  logn -多 "话1" "话2" …             一条条发：中间隔 6 秒，「在打字」一直亮到最后一句
+  logn -引 <id> "话"                引用某一句再回
+  logn -图 <图片路径> ["话"]         发一张图，带话就跟在后面
+  logn -文件 <路径>                  发一个文件
+  logn 改 <id> "话"                  改我说过的一句
+  logn 删 <id>                       删一句（谁的都能删，连图和文件）
+三页（提醒、日子、笔记）
+  logn 提醒 | 日子 | 笔记             列出来（方括号里是 id，打前几位就行）
+  logn 提醒 加 <YYYY-MM-DD> [HH:MM] "字" [每天|每周|每月|每年|每年按星期] [提前N天…]
+                                    每年按星期＝每年那个月的第几个星期几；提前 30 天＝一个月，7＝一周
+  logn 日子 加 <YYYY-MM-DD> "名字" [每月|每年|农历]
+  logn 笔记 加 "字"                   第一行当标题，\\n 换行
+  logn 笔记 看 <id>
+  logn 提醒|日子|笔记 改 <id> "字"     改字／名字
+  logn 提醒 勾 <id>                   做完／取消做完（重复的跳到下一次）
+  logn 提醒|日子|笔记 删 <id>
+加的东西 Chat 里同时出一张卡，对方点了跳过去。对方发的图和文件在数据目录的 件/ 里，能直接打开看。
+
+"""
+import sys, os, re, time, random, shutil, datetime, calendar, importlib.util
+
+sys.dont_write_bytecode = True     
+_s = importlib.util.spec_from_file_location("logn_server", os.path.join(os.path.dirname(os.path.realpath(__file__)), "logn_server.py"))
+m = importlib.util.module_from_spec(_s); _s.loader.exec_module(m)
+
+页 = {"提醒": "reminders", "日子": "days", "笔记": "notes"}
+重复 = {"每天": "day", "每周": "week", "每月": "month", "每年": "year", "每年按星期": "year", "农历": "lunar"}
+静 = False
+
+
+# ---- 小工具 ----
+
+def 停(话):
+    sys.exit(话)
+
+
+def 新id():
+    """跟手机里一样的 id：毫秒数的 36 进制 + 6 位随机"""
+    n, s = int(time.time() * 1000), ""
+    while n:
+        n, r = divmod(n, 36)
+        s = "0123456789abcdefghijklmnopqrstuvwxyz"[r] + s
+    return s + "".join(random.choice("0123456789abcdefghijklmnopqrstuvwxyz") for _ in range(6))
+
+
+def 新条(**k):
+    """我新加的一条。聊天里的话排在已有的最后一句后面：对方手机的钟可能比服务器快，别跑到对方上头去"""
+    now = m.毫秒()
+    在后 = max([x.get("createdAt") or 0 for x in m.logn读("messages").values()] + [now - 1]) + 1
+    return {"id": 新id(), "by": "ke", "createdAt": 在后, "updatedAt": now, **k}
+
+
+def 时(ms):
+    return datetime.datetime.fromtimestamp(ms / 1000, datetime.timezone.utc).strftime("%m-%d %H:%M UTC")
+
+
+def 找(房, 前):
+    镜 = m.logn读(房)
+    中 = [k for k in 镜 if k.startswith(前)]
+    if len(中) != 1:
+        停("没有这个 id。" if not 中 else "这几位对上好几条，多打几位。")
+    return 镜[中[0]]
+
+
+def 日期(x):
+    try:
+        datetime.date.fromisoformat(x)
+        return x
+    except ValueError:
+        停(f"日期写成 YYYY-MM-DD：{x}")
+
+
+def 存(房, x):
+    m.logn改(房, "put", x)
+
+
+def 改(房, x, **k):
+    m.logn改(房, "put", {**x, **k, "updatedAt": m.毫秒()})
+
+
+def 删(房, x):
+    """删一条，连它挂着的图、封面、文件"""
+    m.logn改(房, "del", x["id"])
+    for p in (x.get("pics") or []) + ([x["poster"]] if x.get("poster") else []):
+        m.logn改("pics", "del", p)
+    if x.get("file"):
+        m.logn改("files", "del", x["file"])
+
+
+def 卡(标, 题, 副, 去):
+    if not 静:
+        存("messages", 新条(kind="card", card={"label": 标, "title": 题, "sub": 副, "route": 去}))
+
+
+def 存件(房, 路, **k):
+    """把我的图、文件放进服务器，记一条 pics／files"""
+    if not os.path.isfile(路):
+        停(f"没有这个文件：{路}")
+    x = 新条(**k)
+    os.makedirs(m.LOGN_件, exist_ok=True)
+    后 = (os.path.splitext(路)[1][1:] or "bin").lower()[:8]
+    shutil.copyfile(路, os.path.join(m.LOGN_件, x["id"] + "." + 后))
+    存(房, x)
+    return x
+
+
+# ---- 聊天 ----
+
+def 说法(x):
+    if x.get("text"):
+        return x["text"]
+    if x.get("pics"):
+        return " ".join("〔图 " + (m.logn件路(p) or "已过期") + "〕" for p in x["pics"])
+    if x.get("kind") == "card":
+        return f'〔卡：{x["card"].get("label", "")} {x["card"].get("title", "")}〕'
+    if x.get("file"):
+        return f'〔{x.get("kind", "file")}：{x.get("name", "")} {m.logn件路(x["file"]) or "已过期"}〕'
+    return "〔空〕"
+
+
+def 看聊天():
+    for x in sorted(m.logn读("messages").values(), key=lambda x: x.get("createdAt", 0))[-15:]:
+        引 = f'（引 {x["replyTo"][:6]}）' if x.get("replyTo") else ""
+        改过 = "（改过）" if x.get("editedAt") else ""
+        print(f'[{x["id"][:8]}] {时(x.get("createdAt", 0))}  {"我" if x.get("by") == "ke" else "对方"}：{引}{说法(x)}{改过}')
+    叫 = m.logn叫()
+    if 叫:
+        print(f"—— 对方 {时(叫)} 点了 Done，还没回")
+
+
+def 聊天(参):
+    if 参[0] == "-引" and len(参) >= 3:
+        存("messages", 新条(text=" ".join(参[2:]).strip(), replyTo=找("messages", 参[1])["id"]))
+    elif 参[0] == "-图" and len(参) >= 2:
+        try:
+            from PIL import Image
+            w, h = Image.open(参[1]).size
+        except Exception:
+            w = h = 0
+        存("messages", 新条(pics=[存件("pics", 参[1], w=w, h=h)["id"]]))
+        if 参[2:]:
+            存("messages", 新条(text=" ".join(参[2:]).strip()))
+    elif 参[0] == "-文件" and len(参) == 2:
+        名 = os.path.basename(参[1])
+        大 = os.path.getsize(参[1]) if os.path.isfile(参[1]) else 0
+        f = 存件("files", 参[1], name=名, type="", size=大)
+        存("messages", 新条(kind="file", file=f["id"], name=名, size=大))
+    elif 参[0] == "-多" and len(参) >= 2:
+        # 对方那边在打字时 5 秒问一次：隔 6 秒发，一次到一句；最后一句前「在打字」一直亮，对方就知道发没发完
+        # 放回对方点 Done 时的那个数，不写新的：写新的监听会当成对方又点了一次
+        叫 = m.logn叫()
+        for i, 话 in enumerate(参[1:]):
+            if i:
+                time.sleep(6)
+            存("messages", 新条(text=话.strip()))
+            if 叫 and i < len(参) - 2:
+                m.logn存(m.LOGN_叫, str(叫))
+    elif 参[0] == "改" and len(参) >= 3:
+        x = 找("messages", 参[1])
+        if x.get("by") != "ke" or not x.get("text"):
+            停("只能改我自己说的字。")
+        改("messages", x, text=" ".join(参[2:]).strip(), editedAt=m.毫秒())
+        return print("改了。")
+    elif 参[0] == "删" and len(参) == 2:
+        删("messages", 找("messages", 参[1]))
+        return print("删了。")
+    elif 参[0].startswith("-"):
+        return print(__doc__)
+    else:
+        存("messages", 新条(text=" ".join(参).strip()))
+    print("发了。")
+
+
+# ---- 提醒、日子、笔记 ----
+
+def 列(房):
+    for x in sorted(m.logn读(房).values(), key=lambda x: (x.get("date", ""), x.get("time", ""), x.get("updatedAt", 0))):
+        if 房 == "reminders":
+            print(f'[{x["id"][:8]}] {x["date"]} {x.get("time") or "全天"} {x.get("repeat", "none")}{" 做完" if x.get("done") else ""}  {x.get("text", "")}')
+        elif 房 == "days":
+            print(f'[{x["id"][:8]}] {x["date"]} {x.get("repeat", "none")}  {x.get("name", "")}')
+        else:
+            标题 = (x.get("text") or "").splitlines()[0] if x.get("text") else "〔图〕"
+            图 = f'  〔{len(x["pics"])} 张图〕' if x.get("pics") else ""
+            print(f'[{x["id"][:8]}] {时(x.get("updatedAt", 0))}  {标题}{图}')
+
+
+def 加提醒(余):
+    if not 余:
+        停('logn 提醒 加 <YYYY-MM-DD> [HH:MM] "字" [每天|每周|每月|每年|每年按星期] [提前N天…]')
+    d = 日期(余.pop(0))
+    t = 余.pop(0) if 余 and re.fullmatch(r"\d\d:\d\d", 余[0]) else ""
+    重, 按星期, 前 = "none", False, []
+    while 余 and re.fullmatch(r"每天|每周|每月|每年|每年按星期|提前\d+天", 余[-1]):
+        k = 余.pop()
+        if k.startswith("提前"):
+            前.append(int(k[2:-1]))
+        else:
+            重, 按星期 = 重复[k], k == "每年按星期"
+    字 = " ".join(余).strip() or 停("要写提醒的字。")
+    x = 新条(text=字, note="", date=d, time=t, repeat=重, byWeekday=按星期, anchor=int(d[8:]), early=sorted(set(前) | {0, 1}))   # 提前一天＋当天都提醒，再加对方要的
+    存("reminders", x)
+    卡("Reminder", 字, d + (" · " + t if t else ""), "reminders/" + x["id"])
+
+
+def 加日子(余):
+    if len(余) < 2:
+        停('logn 日子 加 <YYYY-MM-DD> "名字" [每月|每年|农历]')
+    d = 日期(余.pop(0))
+    重 = 重复[余.pop()] if 余[-1] in ("每月", "每年", "农历") else "none"
+    名 = " ".join(余).strip() or 停("要写名字。")
+    x = 新条(name=名, note="", date=d, repeat=重, anchor=int(d[8:]), lunar=None, byWeekday=False, early=[0, 1])   # 提前一天＋当天
+    存("days", x)
+    卡("Day", 名, d, "days/" + x["id"])
+
+
+def 加笔记(余):
+    字 = " ".join(余).replace("\\n", "\n").strip() or 停("要写笔记的字。")
+    x = 新条(text=字, pics=[])
+    存("notes", x)
+    卡("Note", 字.splitlines()[0], "", "notes/" + x["id"])
+
+
+def 下一次(x, d):
+    """重复提醒的下一次（不含「第几个星期几」那种）"""
+    r = x["repeat"]
+    if r == "day":
+        return d + datetime.timedelta(days=1)
+    if r == "week":
+        return d + datetime.timedelta(days=7)
+    y, mo = (d.year + d.month // 12, d.month % 12 + 1) if r == "month" else (d.year + 1, d.month)
+    return datetime.date(y, mo, min(x.get("anchor") or d.day, calendar.monthrange(y, mo)[1]))
+
+
+def 勾(x):
+    if x.get("done"):
+        return 改("reminders", x, done=False, doneAt=None)
+    if x.get("repeat", "none") == "none":
+        return 改("reminders", x, done=True, doneAt=m.毫秒())
+    if x.get("byWeekday"):
+        停("「第几个星期几」那种重复的让对方在手机上勾。")
+    起 = max(datetime.date.fromisoformat(x["date"]), datetime.date.fromisoformat(time.strftime("%Y-%m-%d")))
+    n = 下一次(x, datetime.date.fromisoformat(x["date"]))
+    while n <= 起:
+        n = 下一次(x, n)
+    改("reminders", x, date=n.isoformat(), lastDone=m.毫秒())
+    print("下一次：" + n.isoformat())
+
+
+def 三页(房, 作, 余):
+    if not 作:
+        return 列(房)
+    if 作 == "加":
+        {"reminders": 加提醒, "days": 加日子, "notes": 加笔记}[房](余)
+        return print("加了。")
+    if not 余:
+        return print(__doc__)
+    x = 找(房, 余[0])
+    if 作 == "看":
+        print(x.get("text") or x.get("name") or "")
+        for p in x.get("pics") or []:
+            print("〔图 " + (m.logn件路(p) or "没传上来") + "〕")
+    elif 作 == "改" and len(余) >= 2:
+        字 = " ".join(余[1:]).replace("\\n", "\n").strip()
+        改(房, x, **({"name": 字} if 房 == "days" else {"text": 字}))
+        print("改了。")
+    elif 作 == "勾" and 房 == "reminders":
+        勾(x)
+        print("好了。")
+    elif 作 == "删":
+        删(房, x)
+        print("删了。")
+    else:
+        print(__doc__)
+
+
+# ---- 入口 ----
+
+参 = sys.argv[1:]
+if 参[:1] == ["--静"]:
+    静, 参 = True, 参[1:]
+if not 参:
+    看聊天()
+elif 参[0] in 页:
+    三页(页[参[0]], 参[1] if len(参) > 1 else "", 参[2:])
+else:
+    聊天(参)

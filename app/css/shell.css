@@ -1,0 +1,54 @@
+/* 外壳：顶栏、换页、侧栏 */
+.app{position:fixed;inset:0;display:flex;flex-direction:column;background:var(--bg);overflow:hidden;
+  padding-top:env(safe-area-inset-top)}
+
+/* 顶栏：左菜单、中间标题、右边这页的「加」 */
+.bar{flex:none;height:var(--bar-h);margin-top:14px;display:flex;align-items:center;gap:12px;padding:0 var(--pad)}   /* 整行离顶上留出空，别贴着屏幕边 */
+.bar .title{flex:1;min-width:0}
+.bar .title b{font-size:16px;font-weight:600;letter-spacing:-.01em;white-space:nowrap}
+.round{position:relative;flex:none;width:40px;height:40px;border-radius:12px;background:none;
+  border:1px solid var(--line);display:grid;place-items:center;color:var(--ink-2)}
+.round:active{transform:scale(.96)}
+.round.on{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.round.on .badge{background:var(--red);color:#fff}
+.bar .round+.round{margin-left:-4px}
+.round[hidden]{display:none}
+svg.fill{fill:currentColor;stroke:none}
+svg.clawd{width:24px;height:18px;stroke:none}
+.badge{position:absolute;top:-5px;right:-5px;min-width:19px;height:19px;padding:0 5px;border-radius:10px;
+  background:var(--ink);color:var(--bg);font-size:11px;font-weight:700;font-style:normal;line-height:19px;text-align:center;
+  border:2px solid var(--bg)}
+
+/* 页面：同一时间只显示一页，页内自己的列表滚 */
+.pages{flex:1;min-height:0;position:relative}
+.page{position:absolute;inset:0;display:none;flex-direction:column}
+.page.on{display:flex}
+.scroll{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:4px var(--pad) calc(28px + env(safe-area-inset-bottom))}
+.scroll::-webkit-scrollbar{display:none}
+
+/* 侧栏：左边三分之二；右边三分之一是当前页，糊一点、淡一点 */
+.veil{position:absolute;inset:0;z-index:20;background:var(--veil);
+  -webkit-backdrop-filter:blur(7px);backdrop-filter:blur(7px);
+  opacity:0;pointer-events:none;transition:opacity .24s ease}
+.drawer{position:absolute;z-index:21;top:0;bottom:0;left:0;width:66.667%;max-width:420px;
+  background:var(--card);border-right:1px solid var(--edge);box-shadow:var(--shadow);
+  display:flex;flex-direction:column;padding:calc(env(safe-area-inset-top) + 22px) 18px calc(18px + env(safe-area-inset-bottom));
+  transform:translateX(-102%);transition:transform .26s cubic-bezier(.3,.7,.2,1)}
+.app.drawer-open .veil{opacity:1;pointer-events:auto}
+.app.drawer-open .drawer{transform:none}
+
+.drawer-head{display:flex;flex-direction:column;gap:2px;padding:0 6px 22px}
+.drawer-head .script{font-size:36px;line-height:1.15;color:var(--ink-2)}
+.drawer-list{flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:6px}
+.drawer-item{display:flex;align-items:center;gap:12px;min-height:52px;padding:0 12px;border-radius:16px;text-align:left}
+.drawer-item svg{flex:none;color:var(--ink-2)}
+.drawer-item span{flex:1;font-weight:600}
+.drawer-item .count{flex:none;font-style:normal;min-width:24px;height:22px;padding:0 7px;border-radius:11px;background:var(--card-2);
+  color:var(--ink);font-size:12px;font-weight:700;line-height:22px;text-align:center}
+.drawer-item.on{background:var(--feature);color:var(--on-feature)}
+.drawer-item.on svg{color:var(--on-feature)}
+.drawer-item.on .count{background:var(--on-feature);color:var(--feature)}
+.drawer-foot{display:flex;flex-direction:column;gap:10px;padding:16px 6px 0;border-top:1px solid var(--line)}
+.drawer-foot .label{margin-top:4px}
+.row2{display:flex;gap:8px}
+.row2 .pill{flex:1}

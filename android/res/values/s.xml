@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <!-- 顶上、底下两条系统栏的颜色由网页按页面和深浅交过来（LognApp.bars），这里只是打开那一下的颜色 -->
+  <style name="T" parent="android:Theme.Material.Light.NoActionBar">
+    <item name="android:statusBarColor">#efeff1</item>
+    <item name="android:navigationBarColor">#efeff1</item>
+    <item name="android:windowLightStatusBar">true</item>
+    <item name="android:windowBackground">@color/bg</item>
+  </style>
+  <color name="bg">#efeff1</color>
+</resources>

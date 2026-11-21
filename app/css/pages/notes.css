@@ -1,0 +1,41 @@
+/* Notes：顶上一行，左边按写的／按改的时间排，右边三条线＝一行一条、四个方块＝两列卡片 */
+.nt-top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:10px}
+.nt-view button{display:grid;place-items:center;padding:0 12px}
+.nt-view svg{width:18px;height:18px}
+
+/* 一行一条：正文头一句只占一行；有图右边一张小图，多张角上写几张 */
+.nt-row .p{margin-top:2px;font-size:12.5px;color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nt-row .t.muted,.nt-card .t.muted{color:var(--ink-2)}
+.nt-thumb{position:relative;width:44px;height:44px;border-radius:8px;overflow:hidden;background:var(--card-2)}
+.nt-thumb img{display:block;width:100%;height:100%;object-fit:cover}
+.nt-thumb i{position:absolute;right:3px;bottom:3px;padding:0 4px;border-radius:6px;background:rgba(0,0,0,.45);color:#fff;font-size:10px;font-style:normal;line-height:15px}
+
+/* 两列卡片：有图的上面一张图 */
+.nt-grid{display:flex;align-items:flex-start;gap:10px;margin-top:12px}
+.nt-col{flex:1;min-width:0;display:flex;flex-direction:column;gap:10px}
+.nt-card{position:relative;background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;cursor:pointer}
+.nt-card:active,.nt-card.picked{background:var(--card-2)}
+.nt-card .img{height:120px;background:var(--card-2)}
+.nt-card .img img{display:block;width:100%;height:100%;object-fit:cover}
+.nt-card .in{padding:10px 12px 12px}
+.nt-card .t{font-size:14.5px;line-height:1.4;word-break:break-word}
+.nt-card .p{margin-top:4px;font-size:12px;line-height:1.5;color:var(--ink-2);word-break:break-word;
+  display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+.nt-card .s{margin-top:6px;font-size:11px;color:var(--ink-3)}
+.nt-card .pick{position:absolute;top:8px;right:8px;background:var(--card)}
+.nt-card .pick.on{background:var(--ink)}
+
+/* 详情里的图：一张就整张，多张两个一排的方块；点了看大图 */
+.nt-pics{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.nt-pics img{display:block;width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px;background:var(--card-2)}
+.nt-pics.one{grid-template-columns:1fr}
+.nt-pics.one img{aspect-ratio:auto}
+
+/* 改的时候的图：四个一排，右上 × 去掉 */
+.nt-edit-pics{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.nt-edit-pics:empty{display:none}
+.nt-edit-pics .ph{position:relative;aspect-ratio:1;border-radius:8px;overflow:hidden;background:var(--card-2)}
+.nt-edit-pics img{display:block;width:100%;height:100%;object-fit:cover}
+.nt-edit-pics button{position:absolute;top:0;right:0;width:44px;height:44px;display:grid;place-items:start end;padding:5px}
+.nt-edit-pics button i{width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,.55);color:#fff;display:grid;place-items:center}
+.nt-edit-pics button svg{width:12px;height:12px;stroke-width:2.4}

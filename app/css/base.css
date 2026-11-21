@@ -1,0 +1,12 @@
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden;background:var(--bg)}
+body{font-family:var(--sans);font-size:var(--fs-body);color:var(--ink);-webkit-font-smoothing:antialiased;user-select:none;-webkit-user-select:none}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+input,textarea{font:inherit;color:inherit;user-select:text;-webkit-user-select:text}
+svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+[hidden]{display:none!important}
+:focus{outline:none}
+:focus-visible{outline:2px solid var(--ink-3);outline-offset:2px}
+.label{font-size:var(--fs-label);letter-spacing:.18em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+.script{font-family:var(--script);font-weight:400;color:var(--ink-3)}
+.muted{color:var(--ink-2)}
